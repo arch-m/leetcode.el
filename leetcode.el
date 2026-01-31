@@ -294,7 +294,7 @@ python3, ruby, rust, scala, swift, mysql, mssql, oraclesql.")
 
 ;; Header
 (defconst leetcode--User-Agent       '("User-Agent" .
-                                       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:66.0) Gecko/20100101 Firefox/66.0"))
+                                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"))
 (defconst leetcode--X-Requested-With '("X-Requested-With" . "XMLHttpRequest"))
 (defconst leetcode--X-CSRFToken      "X-CSRFToken")
 (defconst leetcode--Content-Type     '("Content-Type" . "application/json"))
@@ -505,7 +505,7 @@ Such as 'Two Sum' will be converted to 'two-sum'. 'Pow(x, n)' will be 'powx-n'"
 (aio-defun leetcode--common-extra-headers ()
   "Common extra headers for `url-request-extra-headers'."
   `(,leetcode--User-Agent ,leetcode--Content-Type
-    ,(cons leetcode--X-CSRFToken (aio-await (leetcode--csrf-token)))))
+                          ,(cons leetcode--X-CSRFToken (aio-await (leetcode--csrf-token)))))
 
 (defun leetcode--buffer-content (buf)
   "Get content without text properties of BUF."
@@ -567,7 +567,7 @@ of QUERY-NAME."
               (response-status (car response))
               (response-buffer (cdr response)))
          (if-let ((error (plist-get response-status :error)))
-             (swith-to-buffer response-buffer)
+             (switch-to-buffer response-buffer)
            (let-alist (with-current-buffer response-buffer (goto-char url-http-end-of-headers) (json-read))
              ,@body))))))
 
@@ -580,8 +580,9 @@ of QUERY-NAME."
   ;; problem list
   (setf (leetcode-problems-num leetcode--problems) .data.problemsetQuestionList.total
         (leetcode-problems-tag leetcode--problems) "all")
-  (let (problems)
-    (dotimes (i .data.problemsetQuestionList.total)
+  (let ((problems)
+        (questions-count (length .data.problemsetQuestionList.questions)))
+    (dotimes (i questions-count)
       (let-alist (aref .data.problemsetQuestionList.questions i)
         (push (make-leetcode-problem
                :status     .status
